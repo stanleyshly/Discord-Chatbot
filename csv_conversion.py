@@ -48,8 +48,9 @@ for fname in glob.glob(path):
 #print("Number of NAN rows to be removed", full_df.isna().sum())
 #print(full_df[full_df.isna().any(axis=1)]) # and rows with Nan
 print("Shape before filtering", full_df.shape)
-full_df.dropna(subset=columns, inplace = True, how='all')
-full_df = full_df.fillna('') # replace Nans with empty strings
+full_df = full_df.dropna()
+#full_df.dropna(subset=columns, inplace = True, how='all')
+#full_df = full_df.fillna('') # replace Nans with empty strings
 #pd.set_option('display.max_rows', 5)  # or 1000
 #pd.set_option('display.max_columns', None)  # or 1000
 #print(full_df.sample(6)) 

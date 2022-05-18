@@ -1,6 +1,7 @@
 **.csv
 .DS_Store
 cached/
+alias.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
