@@ -41,7 +41,7 @@ print(df)
 # create dataset suitable for our model
 def construct_conv(row, tokenizer, eos = True):
     flatten = lambda l: [item for sublist in l for item in sublist]
-    conv = list(reversed([tokenizer.encode(x, is_split_into_words=True) + [tokenizer.eos_token_id] for x in row]))
+    conv = list(reversed([tokenizer.encode(x, is_split_into_words=True, add_prefix_space=True) + [tokenizer.eos_token_id] for x in row]))
     conv = flatten(conv)
     return conv
 
