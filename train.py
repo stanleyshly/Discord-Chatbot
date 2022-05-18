@@ -41,7 +41,9 @@ print(df)
 # create dataset suitable for our model
 def construct_conv(row, tokenizer, eos = True):
     flatten = lambda l: [item for sublist in l for item in sublist]
-    conv = list(reversed([tokenizer.encode(x, is_split_into_words=True,add_prefix_space=True)) + [tokenizer.eos_token_id] for x in row]))
+    #print(row.values.tolist()[1:]) 
+    conv = list(reversed([tokenizer.encode(x) + [tokenizer.eos_token_id] for x in row.values.tolist()[1:]])) # THIS IS DIFFERENT
+    # NEED TO CONVERT TO LIST AND REMOVE THE FIRST ROW NUMBER
     conv = flatten(conv)
     return conv
 
@@ -129,8 +131,8 @@ def _rotate_checkpoints(args, checkpoint_prefix="checkpoint", use_mtime=False) -
 from transformers import AutoModelWithLMHead, AutoModelForCausalLM, AutoTokenizer
 import torch
 
-tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-small")
-model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-small")
+tokenizer = AutoTokenizer.from_pretrained('microsoft/DialoGPT-small')
+model = AutoModelWithLMHead.from_pretrained('microsoft/DialoGPT-small')
 
 """
 Fine-tuning the library models for language modeling on a text file (GPT, GPT-2, BERT, RoBERTa).
@@ -157,9 +159,9 @@ class Args():
         self.do_train = True
         self.do_eval = True
         self.evaluate_during_training = False
-        self.per_gpu_train_batch_size = 4
-        self.per_gpu_eval_batch_size = 4
-        self.gradient_accumulation_steps = 1
+        self.per_gpu_train_batch_size = 1
+        self.per_gpu_eval_batch_size = 1
+        self.gradient_accumulation_steps = 4
         self.learning_rate = 5e-5
         self.weight_decay = 0.0
         self.adam_epsilon = 1e-8
@@ -458,7 +460,7 @@ def main(df_trn, df_val):
         )
 
     # Setup CUDA, GPU & distributed training
-    device = torch.device("cuda")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")#torch.device("cuda")
     args.n_gpu = torch.cuda.device_count()
     args.device = device
 
