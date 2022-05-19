@@ -25,7 +25,7 @@ for fname in sorted(glob.glob(path)):
 	current_message = ""
 	for current_index in range (0, len(change_value)-1):
 		if change_value[current_index+1] == False:
-			current_message = current_message + str(raw_df["Content"][current_index]) + " \n "
+			current_message = current_message + str(raw_df["Content"][current_index]) + "\n"
 			#print(raw_df.at[current_index, "Content"])
 			#print(str(raw_df["Content"][current_index]))
 		else:

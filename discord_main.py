@@ -31,7 +31,7 @@ class MyClient(discord.Client):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.tokenizer = AutoTokenizer.from_pretrained('microsoft/DialoGPT-small')
         #model = AutoModelWithLMHead.from_pretrained("microsoft/DialoGPT-small").to(device)
-        self.model = AutoModelForCausalLM.from_pretrained('./output-small/').to(self.device)
+        self.model = AutoModelForCausalLM.from_pretrained(self.config["MODEL"]).to(self.device)
 
 
     def query(self, message):
@@ -47,7 +47,7 @@ class MyClient(discord.Client):
             do_sample=True, 
             top_k=100, 
             top_p=0.7,
-            temperature=0.8
+            temperature=self.config["TEMPERATURE"]
         ).to(self.device)
         return self.tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
 
