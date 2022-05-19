@@ -42,8 +42,8 @@ print(df)
 def construct_conv(row, tokenizer, eos = True):
     flatten = lambda l: [item for sublist in l for item in sublist]
     #print(row.values.tolist()[1:]) 
-    conv = list(reversed([tokenizer.encode(x) + [tokenizer.eos_token_id] for x in row.values.tolist()[1:]])) # THIS IS DIFFERENT
-    # NEED TO CONVERT TO LIST AND REMOVE THE FIRST ROW NUMBER
+    conv = list(reversed([tokenizer.encode(x) + [tokenizer.eos_token_id] for x in row.fillna('').values.tolist()[1:]])) # THIS IS DIFFERENT
+    # NEED TO CONVERT TO LIST, FILL NANS AND REMOVE THE FIRST ROW NUMBER
     conv = flatten(conv)
     return conv
 
@@ -128,11 +128,11 @@ def _rotate_checkpoints(args, checkpoint_prefix="checkpoint", use_mtime=False) -
         logger.info("Deleting older checkpoint [{}] due to args.save_total_limit".format(checkpoint))
         shutil.rmtree(checkpoint)
 
-from transformers import AutoModelWithLMHead, AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 
 tokenizer = AutoTokenizer.from_pretrained('microsoft/DialoGPT-small')
-model = AutoModelWithLMHead.from_pretrained('microsoft/DialoGPT-small')
+model = AutoModelForCausalLM.from_pretrained('microsoft/DialoGPT-small')
 
 """
 Fine-tuning the library models for language modeling on a text file (GPT, GPT-2, BERT, RoBERTa).
@@ -175,7 +175,7 @@ class Args():
         self.eval_all_checkpoints = False
         self.no_cuda = False
         self.overwrite_output_dir = True
-        self.overwrite_cache = True
+        self.overwrite_cache = False 
         self.should_continue = False
         self.seed = 42
         self.local_rank = -1
@@ -183,6 +183,8 @@ class Args():
         self.fp16_opt_level = 'O1'
 
 args = Args()
+
+
 
 def train(args, train_dataset, model: PreTrainedModel, tokenizer: PreTrainedTokenizer) -> Tuple[int, float]:
     """ Train the model """
@@ -434,6 +436,7 @@ def evaluate(args, model: PreTrainedModel, tokenizer: PreTrainedTokenizer, df_tr
 
     return result
 
+
 # Main runner
 
 def main(df_trn, df_val):
@@ -484,7 +487,7 @@ def main(df_trn, df_val):
 
     config = AutoConfig.from_pretrained(args.config_name, cache_dir=args.cache_dir)
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name, cache_dir=args.cache_dir)
-    model = AutoModelWithLMHead.from_pretrained(
+    model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path,
         from_tf=False,
         config=config,
@@ -519,7 +522,7 @@ def main(df_trn, df_val):
         torch.save(args, os.path.join(args.output_dir, "training_args.bin"))
 
         # Load a trained model and vocabulary that you have fine-tuned
-        model = AutoModelWithLMHead.from_pretrained(args.output_dir)
+        model = AutoModelForCausalLM.from_pretrained(args.output_dir)
         tokenizer = AutoTokenizer.from_pretrained(args.output_dir)
         model.to(args.device)
 
@@ -537,7 +540,7 @@ def main(df_trn, df_val):
             global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
             prefix = checkpoint.split("/")[-1] if checkpoint.find("checkpoint") != -1 else ""
 
-            model = AutoModelWithLMHead.from_pretrained(checkpoint)
+            model = AutoModelForCausalLM.from_pretrained(checkpoint)
             model.to(args.device)
             result = evaluate(args, model, tokenizer, df_trn, df_val, prefix=prefix)
             result = dict((k + "_{}".format(global_step), v) for k, v in result.items())

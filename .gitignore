@@ -3,6 +3,9 @@
 cached/
 alias.py
 runs/
+output-small/
+config.yml
+.~lock.processed-data.csv#
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
