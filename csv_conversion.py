@@ -102,5 +102,5 @@ for fname in sorted(glob.glob(path)):
 
 print(full_df.shape)
 print(tabulate(full_df.sample(1).T, headers='keys', tablefmt='pretty'))
-full_df.to_csv('processed-data.csv')
+full_df.to_csv('processed-data.csv', index=False) #save without row number
 

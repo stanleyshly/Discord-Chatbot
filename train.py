@@ -27,6 +27,8 @@ from transformers import (
     PreTrainedModel,
     PreTrainedTokenizer,
     get_linear_schedule_with_warmup,
+    Trainer,
+    TrainingArguments
 )
 
 
@@ -41,8 +43,8 @@ print(df)
 # create dataset suitable for our model
 def construct_conv(row, tokenizer, eos = True):
     flatten = lambda l: [item for sublist in l for item in sublist]
-    #print(row.values.tolist()[1:]) 
-    conv = list(reversed([tokenizer.encode(x) + [tokenizer.eos_token_id] for x in row.fillna('').values.tolist()[1:]])) # THIS IS DIFFERENT
+    #print(row.values.tolist()) 
+    conv = list(reversed([tokenizer.encode(x) + [tokenizer.eos_token_id] for x in row.fillna('').values.tolist()])) # THIS IS DIFFERENT
     # NEED TO CONVERT TO LIST, FILL NANS AND REMOVE THE FIRST ROW NUMBER
     conv = flatten(conv)
     return conv
@@ -192,17 +194,29 @@ def train(args, train_dataset, model: PreTrainedModel, tokenizer: PreTrainedToke
         tb_writer = SummaryWriter()
 
     args.train_batch_size = args.per_gpu_train_batch_size * max(1, args.n_gpu)
-
+    training_args = TrainingArguments(
+        output_dir="./runs", #The output directory
+        overwrite_output_dir=True, #overwrite the content of the output directory
+        num_train_epochs=3, # number of training epochs
+        )
     def collate(examples: List[torch.Tensor]):
         if tokenizer._pad_token is None:
             return pad_sequence(examples, batch_first=True)
         return pad_sequence(examples, batch_first=True, padding_value=tokenizer.pad_token_id)
-
+    '''
     train_sampler = RandomSampler(train_dataset) if args.local_rank == -1 else DistributedSampler(train_dataset)
     train_dataloader = DataLoader(
         train_dataset, sampler=train_sampler, batch_size=args.train_batch_size, collate_fn=collate, drop_last = True
     )
+    '''
+    trainer = Trainer(
+        model,
+        training_args,
+        train_dataset=train_dataset,
+        tokenizer=tokenizer)
+    trainer.train()
 
+    '''
     if args.max_steps > 0:
         t_total = args.max_steps
         args.num_train_epochs = args.max_steps // (len(train_dataloader) // args.gradient_accumulation_steps) + 1
@@ -435,7 +449,7 @@ def evaluate(args, model: PreTrainedModel, tokenizer: PreTrainedTokenizer, df_tr
             writer.write("%s = %s\n" % (key, str(result[key])))
 
     return result
-
+    '''
 
 # Main runner
 
@@ -464,8 +478,12 @@ def main(df_trn, df_val):
 
     # Setup CUDA, GPU & distributed training
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")#torch.device("cuda")
-    args.n_gpu = torch.cuda.device_count()
+    
     args.device = device
+    if torch.cuda.is_available():
+        args.n_gpu = torch.cuda.device_count()
+    else:
+        args.n_gpu = 0
 
     # Setup logging
     logging.basicConfig(
@@ -498,6 +516,10 @@ def main(df_trn, df_val):
     logger.info("Training/evaluation parameters %s", args)
 
     # Training
+    train_dataset = load_and_cache_examples(args, tokenizer, df_trn, df_val, evaluate=False)
+
+    train(args, train_dataset, model, tokenizer)
+    '''
     if args.do_train:
         train_dataset = load_and_cache_examples(args, tokenizer, df_trn, df_val, evaluate=False)
 
@@ -525,6 +547,7 @@ def main(df_trn, df_val):
         model = AutoModelForCausalLM.from_pretrained(args.output_dir)
         tokenizer = AutoTokenizer.from_pretrained(args.output_dir)
         model.to(args.device)
+    '''
 
     # Evaluation
     results = {}
