@@ -4,6 +4,8 @@ cached/
 alias.py
 runs/
 output-small/
+output-medium/
+output-large/
 config.yml
 .~lock.processed-data.csv#
 

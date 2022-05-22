@@ -29,7 +29,7 @@ class MyClient(discord.Client):
         from transformers import AutoModelForCausalLM, AutoTokenizer
         self.config = config        
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.tokenizer = AutoTokenizer.from_pretrained('microsoft/DialoGPT-small')
+        self.tokenizer = AutoTokenizer.from_pretrained(self.config["TOKENIZER"])
         #model = AutoModelWithLMHead.from_pretrained("microsoft/DialoGPT-small").to(device)
         self.model = AutoModelForCausalLM.from_pretrained(self.config["MODEL"]).to(self.device)
 

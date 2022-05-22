@@ -65,9 +65,9 @@ def main(conn, config):
     client.run(config["DISCORD_TOKEN"])
 def chatbot(conn, config):        
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    tokenizer = AutoTokenizer.from_pretrained('microsoft/DialoGPT-small')
+    tokenizer = AutoTokenizer.from_pretrained(config["TOKENIZER"])
     #model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-small").to(device)
-    model = AutoModelForCausalLM.from_pretrained('./output-small/').to(device)
+    model = AutoModelForCausalLM.from_pretrained(config["MODEL"]).to(device)
 
     while True==True:
         # encode the new user input, add the eos_token and return a tensor in Pytorch

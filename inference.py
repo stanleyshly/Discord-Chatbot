@@ -8,14 +8,20 @@ from transformers import (
     get_linear_schedule_with_warmup,
 )
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import BlenderbotSmallTokenizer, BlenderbotSmallForCausalLM
+
 import torch
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-tokenizer = AutoTokenizer.from_pretrained('microsoft/DialoGPT-small')
+#tokenizer = AutoTokenizer.from_pretrained('microsoft/DialoGPT-small')
 #model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-small").to(device)
-model = AutoModelForCausalLM.from_pretrained('./output-small/').to(device)
+#model = AutoModelForCausalLM.from_pretrained('./output-small/').to(device)
 
+#tokenizer = BlenderbotSmallTokenizer.from_pretrained('facebook/blenderbot_small-90M')
+#model = BlenderbotSmallForCausalLM.from_pretrained("./output").to(device)
 
+tokenizer = AutoTokenizer.from_pretrained('microsoft/DialoGPT-medium')
+model = AutoModelForCausalLM.from_pretrained('./output/').to(device)
 
 # Let's chat for 4 lines
 for step in range(50):
