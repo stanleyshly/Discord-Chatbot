@@ -4,6 +4,7 @@ from alias import alias
 from tabulate import tabulate
 import re
 import numpy as np
+import random
 path = "./csv/*.csv"
 username = "ducky#6230"
 
@@ -43,10 +44,14 @@ for fname in sorted(glob.glob(path)):
 
 
 	contexted = []
-
-	# context window of size 7
-	n = 7
+	max_current = 0
+	# context window of size min and max
 	for i in current_df.index:
+		min_window = 2
+		max_window = 10
+		n = random.randint(min_window,max_window)
+		if n > max_current:
+			max_current = n
 		if i < n:
 			continue
 		row = []
@@ -91,7 +96,7 @@ for fname in sorted(glob.glob(path)):
 			contexted.append(row)
 
 	columns = ['response', 'context'] 
-	columns = columns + ['context/' + str(i) for i in range(n - 1)]
+	columns = columns + ['context/' + str(i) for i in range(max_current - 1)]
 	formated_current_df = pd.DataFrame.from_records(contexted, columns=columns)
 
 	full_df = pd.concat([full_df, formated_current_df], axis= 0)
@@ -103,4 +108,5 @@ for fname in sorted(glob.glob(path)):
 print(full_df.shape)
 print(tabulate(full_df.sample(1).T, headers='keys', tablefmt='pretty'))
 full_df.to_csv('processed-data.csv', index=False) #save without row number
+
 
